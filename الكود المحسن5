@@ -1,0 +1,163 @@
+1️⃣Account.java(ملف1)
+  public abstract class Account implements Cloneable {
+    protected String owner;
+    protected double balance;
+
+    public Account(String owner, double balance) {
+        this.owner = owner;
+        this.balance = balance;
+    }
+
+    public void deposit(double amount) {
+        balance += amount;
+    }
+
+    public boolean withdraw(double amount) {
+        if (balance >= amount) {
+            balance -= amount;
+            return true;
+        }
+        return false;
+    }
+
+    public String getOwner() {
+        return owner;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    @Override
+    public Account clone() {
+        try {
+            return (Account) super.clone();
+        } catch (CloneNotSupportedException e) {
+            return null;
+        }
+    }
+}
+-----------------------------------------------------------------------------
+2️⃣ StandardAccount.java(ملف2)
+  
+  public class StandardAccount extends Account {
+    public StandardAccount(String owner, double balance) {
+        super(owner, balance);
+    }
+}
+
+-------------------------------------------------------------------------------
+3️⃣PremiumAccount.java(ملف3)
+public class PremiumAccount extends Account {
+    public PremiumAccount(String owner, double balance) {
+        super(owner, balance);
+    }
+}
+
+-----------------------------------------------------------------------------------------
+4️⃣ AccountFactory.java(ملف4)
+  public class AccountFactory {
+    public static Account createAccount(String owner, double balance, boolean premium) {
+        if (premium) {
+            return new PremiumAccount(owner, balance);
+        }
+        return new StandardAccount(owner, balance);
+    }
+}
+
+--------------------------------------------------------------------------
+5️⃣ NotificationStrategy.java(ملف5)
+  public interface NotificationStrategy {
+    void send(String message);
+}
+
+-----------------------------------------------------------------------
+6️⃣SMSNotification.java(ملف6)
+  public class SMSNotification implements NotificationStrategy {
+    public void send(String message) {
+        System.out.println("SMS: " + message);
+    }
+}
+
+------------------------------------------------------------------
+7️⃣EmailNotification.java(ملف7)
+  public class EmailNotification implements NotificationStrategy {
+    public void send(String message) {
+        System.out.println("EMAIL: " + message);
+    }
+}
+
+--------------------------------------------------
+8️⃣Logger.java(ملف8)
+  public class Logger {
+    public static void log(String message) {
+        System.out.println("[LOG] " + message);
+    }
+}
+
+---------------------------------------------------
+9️⃣BankSystem.java(ملف9)
+  import java.util.ArrayList;
+import java.util.List;
+
+public class BankSystem {
+    private static BankSystem instance;
+    private List<Account> accounts = new ArrayList<>();
+
+    private BankSystem() {}
+
+    public static BankSystem getInstance() {
+        if (instance == null) {
+            instance = new BankSystem();
+        }
+        return instance;
+    }
+
+    public void openAccount(Account account) {
+        accounts.add(account);
+        Logger.log("تم فتح حساب للزبون " + account.getOwner());
+    }
+
+    public Account findAccount(String owner) {
+        for (Account acc : accounts) {
+            if (acc.getOwner().equals(owner)) {
+                return acc;
+            }
+        }
+        return null;
+    }
+
+    public void duplicateAccount(String owner) {
+        Account acc = findAccount(owner);
+        if (acc != null) {
+            Account copy = acc.clone();
+            copy.owner = owner + "_copy";
+            accounts.add(copy);
+            Logger.log("تم تكرار الحساب");
+        }
+    }
+
+    public void printAccounts() {
+        System.out.println("=== الحسابات ===");
+        for (Account acc : accounts) {
+            System.out.println(acc.getOwner() + " | " + acc.getBalance());
+        }
+    }
+}
+
+
+---------------------
+🔟MainApp.java(ملف10)
+  public class MainApp {
+    public static void main(String[] args) {
+
+        BankSystem bank = BankSystem.getInstance();
+
+        bank.openAccount(AccountFactory.createAccount("Amine", 1000, false));
+        bank.openAccount(AccountFactory.createAccount("Sara", 2000, true));
+
+        bank.duplicateAccount("Sara");
+        bank.printAccounts();
+    }
+}
+  
